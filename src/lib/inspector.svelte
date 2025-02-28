@@ -1,9 +1,12 @@
-<script>
+<script lang="ts">
+	import { onMount, type Snippet } from 'svelte';
+
 	const speed = 100;
-	let isOpen = false;
+	let isOpen = $state(false);
 
-	let verified = false;
+	let verified = $state(false);
 
+	let pages = [{ name: 'Home', snippet: homePage, icon: homeIcon }, {}];
 	function openMain() {
 		isOpen = !isOpen;
 	}
@@ -12,9 +15,24 @@
 		verified = true;
 	}
 
-	function openHome() {
-		console.log('Home clicked');
+	function getActiveComponents() {
+		if (import.meta.hot) {
+			import.meta.hot.send('svelteDevTools:getComponents');
+			import.meta.hot.on('svelteDevTools:sendComponents', (data) => {
+				console.log(data);
+			});
+		}
 	}
+
+	onMount(() => {
+		getActiveComponents();
+	});
+
+	function openPage(e: MouseEvent, index: number) {
+		console.log('Opening page', index);
+	}
+
+	let { sijdiajs = 100, obj = { hello: 'hello' } } = $props();
 </script>
 
 <div class="container">
@@ -31,6 +49,13 @@
 			{:else}
 				<div class="devtool-main-content">
 					{@render nav()}
+					<div class="devtool-content">
+						{#each pages as page, index}
+							{#if page.snippet}
+								{@render page.snippet()}
+							{/if}
+						{/each}
+					</div>
 				</div>
 			{/if}
 		</div>
@@ -54,18 +79,34 @@
 	</div>
 {/snippet}
 
+{#snippet homePage()}
+	<div>
+		<div>
+			<div class="">
+				{@render svelteLogo()}
+				<h2><span>Svelte</span> Devtools</h2>
+			</div>
+			<p>V0.0.0</p>
+		</div>
+	</div>
+{/snippet}
+
 {#snippet nav()}
 	<nav>
 		<ul>
-			{@render navItem(homeIcon, 'Home', openHome)}
+			{#each pages as page, index}
+				{#if page.icon}
+					{@render navItem(page.icon, page.name, index)}
+				{/if}
+			{/each}
 		</ul>
 	</nav>
 {/snippet}
 
 <!-- Local components -->
-{#snippet navItem(icon, text, event)}
+{#snippet navItem(icon: Snippet, text: string, menuIndex: number)}
 	<li class="devtool-nav-item">
-		<button onclick={event}>
+		<button onclick={(e) => openPage(e, menuIndex)}>
 			{@render icon()}
 			{text}
 		</button>
@@ -187,8 +228,8 @@
 	.devtool-main-window {
 		position: fixed;
 		bottom: 1vh;
-		width: 50%;
-		height: 30vh;
+		width: 60%;
+		height: 40vh;
 		display: flex;
 		justify-content: center;
 		background-color: var(--bg);
