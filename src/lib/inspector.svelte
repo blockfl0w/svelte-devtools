@@ -6,9 +6,15 @@
 
 	let verified = $state(false);
 
-	let pages = [{ name: 'Home', snippet: homePage, icon: homeIcon }, {}];
+	let components = $state([]);
+
+	let pages = [{ name: 'Home', snippet: homePage, icon: homeIcon }];
+
 	function openMain() {
 		isOpen = !isOpen;
+		if (!verified && import.meta.hot && isOpen) {
+			import.meta.hot.send('svelteDevTools:requestNewCode', window.navigator.userAgent);
+		}
 	}
 
 	function verify() {
@@ -19,12 +25,17 @@
 		if (import.meta.hot) {
 			import.meta.hot.send('svelteDevTools:getComponents');
 			import.meta.hot.on('svelteDevTools:sendComponents', (data) => {
-				console.log(data);
+				components = JSON.parse(data);
 			});
 		}
 	}
 
 	onMount(() => {
+		console.log(
+			`%cSvelte DevTools%c Press Shift + ${false ? 'Option' : 'Alt'} + D to open DevTools`,
+			'color: black; border-radius: 3px; padding: 2px 5px 1px 5px; background: #ee3d02;'
+		);
+
 		getActiveComponents();
 	});
 
@@ -32,7 +43,7 @@
 		console.log('Opening page', index);
 	}
 
-	let { sijdiajs = 100, obj = { hello: 'hello' } } = $props();
+	let { sijdiajs = 100, obj = { hello: 'hello', test: { hello: 'hello' } } } = $props();
 </script>
 
 <div class="container">
@@ -328,5 +339,6 @@
 		display: flex;
 		height: 100%;
 		width: 100%;
+		background-color: #ee3d02;
 	}
 </style>
