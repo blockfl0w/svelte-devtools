@@ -82,6 +82,16 @@ export default function componentTracker() {
 				console.warn(`%cCode: ${currentCode}`, 'padding: 10px 0px 10px 0px');
 			});
 
+			server.ws.on('svelteDevTools:authenticate', (data, client) => {
+				const success = authenticateUser(data.attempt);
+
+				if (success) {
+					client.send('svelteDevTools:authenticated', true);
+				} else {
+					client.send('svelteDevTools:authenticated', false);
+				}
+			})
+
 			// server.ws.on('connection', () => {
 			// 	server.ws.send('svelteDevTools:sendComponents', {
 			// 		msg: JSON.stringify(Array.from(discoveredComponents.values())),
@@ -218,4 +228,21 @@ function detectBrowser(userAgent: string) {
 					: userAgent.indexOf('opera') != -1
 						? 'opera'
 						: 'unknown';
+}
+
+/**
+ * Used to allow 
+ * @param attempt - string attempt to long in with the current password
+ */
+function authenticateUser(attempt: string) {
+	let success = false;
+	
+	if (attempt === currentCode) {
+		success = true;
+
+		// Add browser in to appData to not reauthenticate each time
+
+	}
+
+	return success;
 }

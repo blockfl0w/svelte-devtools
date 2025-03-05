@@ -10,6 +10,8 @@
 
 	let pages = [{ name: 'Home', snippet: homePage, icon: homeIcon }];
 
+	let input: HTMLInputElement;
+
 	function openMain() {
 		isOpen = !isOpen;
 		if (!verified && import.meta.hot && isOpen) {
@@ -18,7 +20,9 @@
 	}
 
 	function verify() {
-		verified = true;
+		if (import.meta.hot) {
+			import.meta.hot?.send("svelteDevTools:authenticate", {attempt: input.value});
+		}
 	}
 
 	function getActiveComponents() {
@@ -30,6 +34,15 @@
 		}
 	}
 
+	function checkForAuth() {
+		if (import.meta.hot) {
+			import.meta.hot.on('svelteDevTools:authenticated', (data) => {
+				console.log(data)
+				data ? verified = true : verified = false;
+			});
+		}
+	}
+
 	onMount(() => {
 		console.log(
 			`%cSvelte DevTools%c Press Shift + ${false ? 'Option' : 'Alt'} + D to open DevTools`,
@@ -37,6 +50,7 @@
 		);
 
 		getActiveComponents();
+		checkForAuth();
 	});
 
 	function openPage(e: MouseEvent, index: number) {
@@ -84,7 +98,7 @@
 			</p>
 		</div>
 		<div>
-			<input type="text" placeholder="Enter your code here" />
+			<input type="text" placeholder="Enter your code here" bind:this={input} />
 			<button class="button" onclick={verify}>Confirm</button>
 		</div>
 	</div>
@@ -105,6 +119,7 @@
 {#snippet nav()}
 	<nav>
 		<ul>
+			{@render svelteLogo()}
 			{#each pages as page, index}
 				{#if page.icon}
 					{@render navItem(page.icon, page.name, index)}
@@ -339,6 +354,5 @@
 		display: flex;
 		height: 100%;
 		width: 100%;
-		background-color: #ee3d02;
 	}
 </style>
