@@ -74,6 +74,7 @@ export default function componentTracker() {
 				const os = detectOS(data);
 				const browser = detectBrowser(data);
 
+				// TODO: Make this output a lot easier to read and prettier to look at
 				console.warn(
 					`Someone using ${browser} on ${os} has requested read and write access through the svelte devtools`
 				);
@@ -90,7 +91,7 @@ export default function componentTracker() {
 				} else {
 					client.send('svelteDevTools:authenticated', false);
 				}
-			})
+			});
 
 			// server.ws.on('connection', () => {
 			// 	server.ws.send('svelteDevTools:sendComponents', {
@@ -231,17 +232,16 @@ function detectBrowser(userAgent: string) {
 }
 
 /**
- * Used to allow 
+ * Used to allow
  * @param attempt - string attempt to long in with the current password
  */
 function authenticateUser(attempt: string) {
 	let success = false;
-	
+
 	if (attempt === currentCode) {
 		success = true;
 
 		// Add browser in to appData to not reauthenticate each time
-
 	}
 
 	return success;
